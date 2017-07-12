@@ -70,13 +70,16 @@ y_train = np.array(augmented_measurements)
 #Test LeNet
 
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda, Activation
+from keras.layers import Flatten, Dense, Lambda, Activation, Cropping2D
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 
 model = Sequential()
-#Prepocess data. Normalize and mean center
-model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
+#Prepocess data. 
+#Cropping
+model.add(Cropping2D(cropping=((70,25),(0,0)), input_shape=(160, 320, 3)))
+#Normalize and mean center
+model.add(Lambda(lambda x: (x / 255.0) - 0.5))
 
 #LeNet
 model.add(Convolution2D(6, 5, 5 , activation='relu'))
