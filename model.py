@@ -9,6 +9,7 @@ lines = []
 #Open csv file and read its lines
 with open('../data/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
+    next(reader)
     for line in reader:
         lines.append(line)
         
@@ -16,25 +17,38 @@ with open('../data/driving_log.csv') as csvfile:
 images = []
 #Outputs
 measurements = []
-for line in lines[1:]:
-    #Take the center image path
-    source_path = line[0]
+correction = 0.2
+
+for line in lines:
+    #Load Center/Left/Right images
+    for i in range(3):
+        #Take the center/left/right image path
+        source_path = line[i]
     
-    #For the Inputs (features) (Images)
-    #take only the file name
-    filename = source_path.split('/')[-1]
-    #Look for the file anme in the image folder
-    current_path = '../data/IMG/' + filename
+        #For the Inputs (features) (Images)
+        #take only the file name
+        filename = source_path.split('/')[-1]
+        #Look for the file anme in the image folder
+        current_path = '../data/IMG/' + filename
    
-    #Once I have the image path, I can use opencv to load it
-    image = cv2.imread(current_path)
-    #Once I loaded the image I can append it to my list of images
-    images.append(image)
+        #Once I have the image path, I can use opencv to load it
+        image = cv2.imread(current_path)
+        #Once I loaded the image I can append it to my list of images
+        images.append(image)
     
-    #For the outputs (Measurements) (Steering angles)
-    #I can do something similar for the steering angles (only interested in this parameter now)
-    measurement = float(line[3])
-    measurements.append(measurement)
+        #For the outputs (Measurements) (Steering angles)
+        #I can do something similar for the steering angles (only interested in this parameter now)
+        #Center Steering
+        if i == 0:
+            measurement = float(line[3])
+        #Left Steering
+        elif i == 1:
+            measurement = float(line[3]) + correction
+        #Right Steering
+        else:
+            measurement = float(line[3]) - correction
+            
+        measurements.append(measurement)
     
 #Flip images so that I have also right turns
 augmented_images, augmented_measurements = [], []
@@ -88,4 +102,5 @@ model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
 
 #Save the trained model so that I can download it to my local machine an see if it's able to go autonomous
 model.save('model.h5')
+exit()
 
