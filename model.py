@@ -1,6 +1,8 @@
 import csv
 import cv2
 import numpy as np
+import tensorflow as tf
+tf.python.control_flow_ops = tf
 
 lines = []
 
@@ -42,15 +44,17 @@ y_train = np.array(measurements)
 #Apply a simple regression network (no activation function needed)
 
 from keras.models import Sequential
-from keras.layers import Flatten, Dense
+from keras.layers import Flatten, Dense, Lambda
 
 model = Sequential()
-model.add(Flatten(input_shape=(160,320,3)))
+#Prepocess data. Normalize and mean center
+model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
+model.add(Flatten())
 model.add(Dense(1))
 
 #MSE (predicted-GT) because is regression network instead of classification (Cross_Entropy)
 model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7)
+model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=2)
 
 #Save the trained model so that I can download it to my local machine an see if it's able to go autonomous
 model.save('model.h5')
