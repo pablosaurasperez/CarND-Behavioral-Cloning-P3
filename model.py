@@ -36,9 +36,21 @@ for line in lines[1:]:
     measurement = float(line[3])
     measurements.append(measurement)
     
+#Flip images so that I have also right turns
+augmented_images, augmented_measurements = [], []
+for image, measurement in zip(images, measurements):
+    augmented_images.append(image)
+    augmented_measurements.append(measurement)
+    #And now I flip
+    image_flipped = np.fliplr(image)
+    measurement_flipped = -measurement
+    augmented_images.append(image_flipped)
+    augmented_measurements.append(measurement_flipped)
+    
 #Now I can convert Features and Outputs in numpy arrays (this is the formast Keras requires)
-X_train = np.array(images)
-y_train = np.array(measurements)
+#Because I augmented the set, I have double the original samples
+X_train = np.array(augmented_images)
+y_train = np.array(augmented_measurements)
 
 
 #Test LeNet
