@@ -1,5 +1,6 @@
 import csv
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 tf.python.control_flow_ops = tf
@@ -61,6 +62,7 @@ for image, measurement in zip(images, measurements):
     augmented_images.append(image_flipped)
     augmented_measurements.append(measurement_flipped)
     
+    
 #Now I can convert Features and Outputs in numpy arrays (this is the formast Keras requires)
 #Because I augmented the set, I have double the original samples
 X_train = np.array(augmented_images)
@@ -99,15 +101,31 @@ model.add(Dense(100))
 model.add(Dense(50))
 model.add(Dense(10))
 
+
 #Output layer
 model.add(Dense(1))
 #end LeNet
 
 #MSE (predicted-GT) because is regression network instead of classification (Cross_Entropy)
 model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.3, shuffle=True, nb_epoch=3)
+history_object = model.fit(X_train, y_train, batch_size=128, validation_split=0.3, shuffle=True, nb_epoch=2)
+
+### print the keys contained in the history object
+print(history_object.history.keys())
+
+### plot the training and validation loss for each epoch
+plt.switch_backend('agg')
+fig = plt.figure()
+plt.plot(history_object.history['loss'])
+plt.plot(history_object.history['val_loss'])
+plt.title('model mean squared error loss')
+plt.ylabel('mean squared error loss')
+plt.xlabel('epoch')
+plt.legend(['training set', 'validation set'], loc='upper right')
+fig.savefig('Loss.png')
 
 #Save the trained model so that I can download it to my local machine an see if it's able to go autonomous
 model.save('model.h5')
+print("Model Saved")
 exit()
 
