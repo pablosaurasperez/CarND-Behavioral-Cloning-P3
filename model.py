@@ -10,7 +10,7 @@ tf.python.control_flow_ops = tf
 samples = []
 
 #Open csv file and read its lines
-with open('../data/driving_log.csv') as csvfile:
+with open('data_training/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)
     for line in reader:
@@ -18,7 +18,10 @@ with open('../data/driving_log.csv') as csvfile:
         
 from sklearn.model_selection import train_test_split
 from random import shuffle
-train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+
+print(len(samples))
+
+train_samples, validation_samples = train_test_split(samples, test_size=0.3)
 
 #Use a generator to load data samples and process them on the fly
 def generator(samples, batch_size=32):
@@ -44,7 +47,7 @@ def generator(samples, batch_size=32):
                     #take only the file name
                     filename = source_path.split('/')[-1]
                     #Look for the file name in the image folder
-                    current_path = '../data/IMG/' + filename
+                    current_path = 'data_training/IMG/' + filename
                     
                     #Once I have the image path, I can use opencv to load it
                     image = cv2.imread(current_path)
@@ -93,7 +96,7 @@ ch, row, col = 3, 160, 320  # Trimmed image format
 #Test NVIDIA Network
 
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda, Activation, Cropping2D
+from keras.layers import Flatten, Dense, Lambda, Activation, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 
@@ -116,10 +119,12 @@ model.add(Convolution2D(64, 3, 3 , activation='relu'))
 model.add(Convolution2D(64, 3, 3 , activation='relu'))
 
 model.add(Flatten())
-
+model.add(Dropout(0.5))
 #3 fully connected layers
 model.add(Dense(100))
+model.add(Dropout(0.5))
 model.add(Dense(50))
+model.add(Dropout(0.5))
 model.add(Dense(10))
 
 
@@ -130,6 +135,7 @@ model.add(Dense(1))
 #MSE (predicted-GT) because is regression network instead of classification (Cross_Entropy)
 model.compile(loss='mse', optimizer='adam')
 history_object = model.fit_generator(train_generator, samples_per_epoch = len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+
 
 ### print the keys contained in the history object
 print(history_object.history.keys())
