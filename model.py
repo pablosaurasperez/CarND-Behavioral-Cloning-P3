@@ -51,6 +51,13 @@ def generator(samples, batch_size=32):
                     
                     #Once I have the image path, I can use opencv to load it
                     image = cv2.imread(current_path)
+                    #image = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+                    #yuv_image = np.array([image for X in image])
+    
+                    #min_image_data = yuv_image.min()
+                    #max_image_data = yuv_image.max()
+                    #print(min_image_data)
+                    #print(max_image_data)
                     #Once I loaded the image I can append it to my list of images
                     images.append(image)
                     
@@ -99,6 +106,7 @@ from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Activation, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
+from keras import regularizers
 
 model = Sequential()
 #Prepocess data. 
@@ -114,18 +122,20 @@ model.add(Lambda(lambda x: (x / 255.0) - 0.5))
 model.add(Convolution2D(24, 5, 5 , subsample=(2,2), activation='relu'))
 model.add(Convolution2D(36, 5, 5 , subsample=(2,2), activation='relu'))
 model.add(Convolution2D(48, 5, 5 , subsample=(2,2), activation='relu'))
+
 #No stride
 model.add(Convolution2D(64, 3, 3 , activation='relu'))
 model.add(Convolution2D(64, 3, 3 , activation='relu'))
 
+model.add(Dropout(0.6))
 model.add(Flatten())
-model.add(Dropout(0.5))
+model.add(Dropout(0.6))
 #3 fully connected layers
-model.add(Dense(100))
-model.add(Dropout(0.5))
-model.add(Dense(50))
-model.add(Dropout(0.5))
-model.add(Dense(10))
+model.add(Dense(100, W_regularizer=regularizers.l2(0.001)))
+model.add(Dropout(0.6))
+model.add(Dense(50, W_regularizer=regularizers.l2(0.001)))
+model.add(Dropout(0.6))
+model.add(Dense(10, W_regularizer=regularizers.l2(0.001)))
 
 
 #Output layer
@@ -134,7 +144,7 @@ model.add(Dense(1))
 
 #MSE (predicted-GT) because is regression network instead of classification (Cross_Entropy)
 model.compile(loss='mse', optimizer='adam')
-history_object = model.fit_generator(train_generator, samples_per_epoch = len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+history_object = model.fit_generator(train_generator, samples_per_epoch = len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=50)
 
 
 ### print the keys contained in the history object
