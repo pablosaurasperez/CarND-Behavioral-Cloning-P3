@@ -13,6 +13,7 @@ samples = []
 with open('data_training/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)
+    #for i in range(10):
     for line in reader:
         samples.append(line)
         
@@ -136,7 +137,6 @@ model.add(Dropout(0.6))
 model.add(Dense(50, W_regularizer=regularizers.l2(0.001)))
 model.add(Dropout(0.6))
 model.add(Dense(10, W_regularizer=regularizers.l2(0.001)))
-
 
 #Output layer
 model.add(Dense(1))
