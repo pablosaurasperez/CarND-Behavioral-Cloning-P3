@@ -108,6 +108,7 @@ from keras.layers import Flatten, Dense, Lambda, Activation, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras import regularizers
+from keras.utils.visualize_util import plot
 
 model = Sequential()
 #Prepocess data. 
@@ -163,6 +164,8 @@ fig.savefig('Loss.png')
 
 #Save the trained model so that I can download it to my local machine an see if it's able to go autonomous
 model.save('model.h5')
+model.summary()
+plot(model, to_file='model.png', show_shapes=True)
 print("Model Saved")
 exit()
 
